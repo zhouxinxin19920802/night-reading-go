@@ -1,0 +1,40 @@
+1.问题Go如何调用shell脚本传递参数
+
+package main
+
+import (
+    "fmt"
+    "os/exec"
+)
+
+func main(){
+    command := "/dir_size.sh"  //脚本文件的绝对路径
+    cmd := exec.Command("/bin/bash", "-c", command)
+
+    output, err := cmd.Output()
+    if err != nil {
+        fmt.Printf("Execute Shell:%s failed with error:%s", command, err.Error())
+        return
+    }
+    fmt.Printf("Execute Shell:%s finished with output:\n%s", command, string(output))
+}
+执行command脚本好理解，exec.Command好理解会执行名为command的脚本，但是如何传递参数？
+exec.Command的源码
+func Command(name string, arg ...string) *Cmd {
+	cmd := &Cmd{
+		Path: name,
+		Args: append([]string{name}, arg...),
+	}
+	if filepath.Base(name) == name {
+		if lp, err := LookPath(name); err != nil {
+			cmd.lookPathErr = err
+		} else {
+			cmd.Path = lp
+		}
+	}
+	return cmd
+}
+可以看出Command返回一个CMD结构体，其中name为路径，参数按照字符串数组的形式直接写cmd := exec.Command("/bin/bash", "-c", command,["参数1","参数2"])
+和脚本的参数相对应。
+原理回头更。
+出处:https://www.jianshu.com/p/dd8a113b02a3
